@@ -1,0 +1,25 @@
+import bluetooth
+import obd
+
+# Encontre o dispositivo Bluetooth OBD2
+target_name = "OBDII" # nome do dispositivo
+target_address = None
+nearby_devices = bluetooth.discover_devices()
+for bdaddr in nearby_devices:
+    if target_name == bluetooth.lookup_name(bdaddr):
+        target_address = bdaddr
+        break
+
+# Conecte-se ao dispositivo OBD2 via Bluetooth
+port = 1
+sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
+sock.connect((target_address, port))
+
+# Configure a interface OBD2
+connection = obd.OBD(sock)
+connection.protocol_id = 0x0A
+connection.set_baudrate(115200)
+
+# Envie um comando para o dispositivo OBD2 e imprima a resposta
+response = connection.query(obd.commands.RPM)
+print(response.value)
